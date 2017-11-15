@@ -26,6 +26,6 @@ $ ./unpackimg.sh boot.img
 
 5. execute: zip -r9 exNoShadez_eas.zip * -x README exNoShadez_eas.zip 
 
-(from within the ../AnyKernel_EX-NoShades-EX folder)
+- (from within the ../AnyKernel_EX-NoShades-EX folder)
 
 6. profit.
