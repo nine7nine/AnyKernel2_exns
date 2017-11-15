@@ -19,8 +19,8 @@ $ ./unpackimg.sh boot.img
 
 4. navigate to ../AnyKernel_EX-NoShades-EX/patch and copy;
 
-devfreq_set.sh
-init.exnoshadez.rc
+- devfreq_set.sh
+- init.exnoshadez.rc
 
 ..and place them into the ../ramdisk folder.
 
