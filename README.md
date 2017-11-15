@@ -24,7 +24,9 @@ $ ./unpackimg.sh boot.img
 
 ..and place them into the ../ramdisk folder.
 
-5. execute: zip -r9 exNoShadez_eas.zip * -x README exNoShadez_eas.zip 
+5. execute: 
+
+$ zip -r9 exNoShadez_eas.zip * -x README exNoShadez_eas.zip 
 
 - (from within the ../AnyKernel_EX-NoShades-EX folder)
 
