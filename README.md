@@ -10,6 +10,8 @@ In order to use AnyKernel 2, you must have the ramdisk contents from The Pixel's
 
 - XDA thread AIK (all flavours, win/linux): https://forum.xda-developers.com/showthread.php?t=2073775
 
+# Instructions
+
 1. place the boot.img into the AIK-Linux folder
 2. extract/split the boot.img
 
