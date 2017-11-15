@@ -1,0 +1,90 @@
+# exNoShadez-EAS for Pixel/Pixel XL by Nine7nine <johnstonljordan@gmail.com>
+
+on init
+
+    # disable perfd = We use Dynamic Stune boost [in kernel], 
+    # not Power Hal [in Userspace] which relies on Perfd.
+    # AKA: No Power Hal hints!
+    stop perfd
+
+    # update cpusets now that processors are up
+    write /dev/cpuset/top-app/cpus 0-3
+    write /dev/cpuset/foreground/cpus 0-3
+    write /dev/cpuset/foreground/boost/cpus 0-3
+    write /dev/cpuset/background/cpus 0-3
+    write /dev/cpuset/system-background/cpus 0-3
+
+    # schedTune value for foreground/top-app on boot
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 10
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+
+    # Boost sched_cfs_boost on boot
+    write /proc/sys/kernel/sched_cfs_boost 70
+
+on boot 
+
+    # devfreq_set.sh
+service devfreq_set /system/devfreq_set.sh
+    class main
+    user root
+    group root
+    oneshot
+
+on late-fs
+
+    # Boot Time FS Tune (Google Recommendations)
+    write /sys/block/sda/queue/iostats 0
+    write /sys/block/sda/queue/scheduler cfq
+    write /sys/block/sda/queue/iosched/slice_idle 0
+    write /sys/block/sda/queue/read_ahead_kb 2048
+    write /sys/block/sda/queue/nr_requests 256
+    write /sys/block/dm-0/queue/read_ahead_kb 2048
+    write /sys/block/dm-1/queue/read_ahead_kb 2048
+
+on property:dev.bootcomplete=1
+
+#    setprop setprop audio_hal.period_size 384
+#    setprop audio.offload.buffer.size.kb 64
+#    setprop audio.offload.passthrough true	
+#    setprop audio.offload.pcm.24bit.enable true
+#    setprop audio_hal.period_multiplier 2
+
+    # USB Fast Charge
+    write /sys/kernel/fast_charge/force_fast_charge 1
+
+    # WiFi Mac Address Randomization
+    write /proc/sys/dev/cnss/randomize_mac 1
+
+    # Entropy Pool /dev/random
+    write /proc/sys/kernel/random/poolsize 4096
+    write /proc/sys/kernel/random/read_wakeup_threshold 128
+    write /proc/sys/kernel/random/write_wakeup_threshold 2048
+
+    # IO Tweaks
+    write /sys/block/sda/queue/rq_affinity 2
+
+    # Set Schedutil Cpu Governor on Big.Little Cores
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
+
+    # Reset sched_cfs_boost (we only want top-app boosted)
+    write /proc/sys/kernel/sched_cfs_boost 0
+
+    # Set Top-App Boost -> but Switching To Dynamic Boost	
+    write /dev/stune/top-app/schedtune.boost 2
+
+    # EAS / SchedUtil / Cpu Scheduler Tweaks
+    # These will adjust some other Scheduler Tunables.
+    write /proc/sys/kernel/sched_sync_hint_enable 1
+    write /proc/sys/kernel/sched_tunable_scaling 0
+    write /proc/sys/kernel/sched_use_walt_cpu_util 1
+    write /proc/sys/kernel/sched_use_walt_task_util 1
+
+    # Dynamic Stune Boost
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 2
+
+    # Enable Input Boost 
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 0
+
+    # GoodBye!
