@@ -1,4 +1,4 @@
-# AnyKernel2_EX-Noshades-EAS
+# AnyKernel2_exns
 AnyKernel Configuration for EX-NoShadez-EAS
 
 AnyKernel2 is used to make flashable zips for EX-NoShades-EAS. It's a fantastic tool and super easy to use. This AnyKernel2 is already setup for my kernel, so no editing required ~ any configuration changes that I make will land in this repo...
@@ -6,7 +6,7 @@ AnyKernel2 is used to make flashable zips for EX-NoShades-EAS. It's a fantastic 
 - Anykernel2 repo: https://github.com/osm0sis/AnyKernel2
 - XDA thread: https://forum.xda-developers.com/showthread.php?t=2239421 
 
-In order to use AnyKernel 2, you must have the ramdisk contents from The Pixel's stock boot image (which in my builds, I update every month - as it's hard to know what files or configurations might have been changed in the stock boot.img, month to month). In order to extract the booot.img's ramdisk, you need AIK (Android Image Kitchen).
+In order to use AnyKernel 2, you must have the /ramdisk folder from The Pixel's stock boot image (which in my builds, I update every month - as it's hard to know what files or configurations might have been changed in the stock boot.img, month to month). In order to extract the booot.img's ramdisk, you need AIK (Android Image Kitchen).
 
 - XDA thread AIK (all flavours, win/linux): https://forum.xda-developers.com/showthread.php?t=2073775
 
@@ -19,7 +19,7 @@ $ ./unpackimg.sh boot.img
 
 3. copy the ramdisk contents into the AnyKernel_EX-NoShades-EX folder
 
-4. navigate to ../AnyKernel_EX-NoShades-EX/patch and copy;
+4. navigate to ../AnyKernel2_exns/patch folder and copy;
 
 - devfreq_set.sh
 - init.exnoshadez.rc
