@@ -12,12 +12,16 @@ In order to use AnyKernel 2, you must have the /ramdisk folder from The Pixel's 
 
 # Instructions
 
-1. place the boot.img into the AIK-Linux folder
-2. extract/split the boot.img
+0. place the (stock) boot.img into the AIK-Linux folder
+
+1. extract/split the boot.img
 
 $ ./unpackimg.sh boot.img 
 
-3. copy the ramdisk contents into the AnyKernel_EX-NoShades-EX folder
+2. copy the ramdisk contents into the AnyKernel_EX-NoShades-EX folder
+
+3. place your compiled kernel image into /AnyKernel2_exns folder
+- ( ie: ../Noshadez_kho/arch/arm64/boot/Image.lz4-dtb)
 
 4. navigate to ../AnyKernel2_exns/patch folder and copy;
 
