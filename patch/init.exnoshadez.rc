@@ -11,16 +11,14 @@ on init
     write /dev/cpuset/top-app/cpus 0-3
     write /dev/cpuset/foreground/cpus 0-3
     write /dev/cpuset/foreground/boost/cpus 0-3
-    write /dev/cpuset/background/cpus 0-3
-    write /dev/cpuset/system-background/cpus 0-3
-
-    # schedTune value for foreground/top-app on boot
-    write /dev/stune/foreground/schedtune.prefer_idle 1
-    write /dev/stune/top-app/schedtune.boost 10
-    write /dev/stune/top-app/schedtune.prefer_idle 1
+    write /dev/cpuset/background/cpus 0-1
+    write /dev/cpuset/system-background/cpus 0-1
 
     # Boost sched_cfs_boost on boot
     write /proc/sys/kernel/sched_cfs_boost 70
+
+    # something is trying to set to 10 - stop it!	
+    write /dev/stune/top-app/schedtune.boost 0
 
 on boot 
 
@@ -53,6 +51,9 @@ on property:dev.bootcomplete=1
     # USB Fast Charge
     write /sys/kernel/fast_charge/force_fast_charge 1
 
+    # Set RCU stall timeout to minimal value
+    write /sys/module/rcupdate/parameters/rcu_cpu_stall_timeout 3
+
     # WiFi Mac Address Randomization
     write /proc/sys/dev/cnss/randomize_mac 1
 
@@ -71,20 +72,14 @@ on property:dev.bootcomplete=1
     # Reset sched_cfs_boost (we only want top-app boosted)
     write /proc/sys/kernel/sched_cfs_boost 0
 
-    # Set Top-App Boost -> but Switching To Dynamic Boost	
-    write /dev/stune/top-app/schedtune.boost 2
-
-    # EAS / SchedUtil / Cpu Scheduler Tweaks
-    # These will adjust some other Scheduler Tunables.
-    write /proc/sys/kernel/sched_sync_hint_enable 1
-    write /proc/sys/kernel/sched_tunable_scaling 0
-    write /proc/sys/kernel/sched_use_walt_cpu_util 1
-    write /proc/sys/kernel/sched_use_walt_task_util 1
+    # schedTune value for foreground/top-app on boot
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.prefer_idle 1
 
     # Dynamic Stune Boost
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 2
+    # write /sys/module/cpu_boost/parameters/dynamic_stune_boost 2
+    # Set Top-App Boost -> but Switching To Dynamic Boost	
+    # write /dev/stune/top-app/schedtune.boost 0
 
-    # Enable Input Boost 
-    write /sys/module/cpu_boost/parameters/input_boost_enabled 0
 
     # GoodBye!
