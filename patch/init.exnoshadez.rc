@@ -7,18 +7,8 @@ on init
     # AKA: No Power Hal hints!
     stop perfd
 
-    # update cpusets now that processors are up
-    write /dev/cpuset/top-app/cpus 0-3
-    write /dev/cpuset/foreground/cpus 0-3
-    write /dev/cpuset/foreground/boost/cpus 0-3
-    write /dev/cpuset/background/cpus 0-1
-    write /dev/cpuset/system-background/cpus 0-1
-
     # Boost sched_cfs_boost on boot
     write /proc/sys/kernel/sched_cfs_boost 70
-
-    # something is trying to set to 10 - stop it!	
-    write /dev/stune/top-app/schedtune.boost 0
 
 on boot 
 
@@ -28,17 +18,6 @@ service devfreq_set /system/devfreq_set.sh
     user root
     group root
     oneshot
-
-on late-fs
-
-    # Boot Time FS Tune (Google Recommendations)
-    write /sys/block/sda/queue/iostats 0
-    write /sys/block/sda/queue/scheduler cfq
-    write /sys/block/sda/queue/iosched/slice_idle 0
-    write /sys/block/sda/queue/read_ahead_kb 2048
-    write /sys/block/sda/queue/nr_requests 256
-    write /sys/block/dm-0/queue/read_ahead_kb 2048
-    write /sys/block/dm-1/queue/read_ahead_kb 2048
 
 on property:dev.bootcomplete=1
 
@@ -76,10 +55,13 @@ on property:dev.bootcomplete=1
     write /dev/stune/foreground/schedtune.prefer_idle 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
 
-    # Dynamic Stune Boost
-    # write /sys/module/cpu_boost/parameters/dynamic_stune_boost 2
-    # Set Top-App Boost -> but Switching To Dynamic Boost	
-    # write /dev/stune/top-app/schedtune.boost 0
+    # Set Top-App Boost to ZERO	
+    write /dev/stune/top-app/schedtune.boost 0
 
+    # Cpu-boot / Dynamic Stune Boost
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 15
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:0 1:0 2:0 3:0"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 1500
 
     # GoodBye!
