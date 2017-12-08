@@ -19,7 +19,7 @@ In order to use AnyKernel 2, you must have the /ramdisk folder from The Pixel's 
 $ ./unpackimg.sh boot.img 
 
 2. place your compiled kernel image into /AnyKernel2_exns folder
-- ( ie: ../Noshadez_kho/arch/arm64/boot/Image.lz4-dtb)
+- ( ie: ../Marlin_exns_eas/arch/arm64/boot/Image.lz4-dtb)
 
 3. navigate to ../AnyKernel2_exns/patch folder and copy;
 
