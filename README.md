@@ -18,22 +18,20 @@ In order to use AnyKernel 2, you must have the /ramdisk folder from The Pixel's 
 
 $ ./unpackimg.sh boot.img 
 
-2. copy the ramdisk contents into the AnyKernel_EX-NoShades-EX folder
-
-3. place your compiled kernel image into /AnyKernel2_exns folder
+2. place your compiled kernel image into /AnyKernel2_exns folder
 - ( ie: ../Noshadez_kho/arch/arm64/boot/Image.lz4-dtb)
 
-4. navigate to ../AnyKernel2_exns/patch folder and copy;
+3. navigate to ../AnyKernel2_exns/patch folder and copy;
 
 - devfreq_set.sh
 - init.exnoshadez.rc
 
 ..and place them into the ../ramdisk folder.
 
-5. execute: 
+4. execute: 
 
 $ zip -r9 exNoShadez_eas.zip * -x README exNoShadez_eas.zip 
 
 - (from within the ../AnyKernel_EX-NoShades-EX folder)
 
-6. profit.
+5. profit.
