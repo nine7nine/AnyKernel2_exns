@@ -2,10 +2,14 @@
 
 on init
 
+    write /sys/block/zram0/comp_algorithm lz4
+    write /sys/block/zram0/max_comp_streams 4
+    write /sys/block/zram0/disksize 536870912
+
     # disable perfd = We use Dynamic Stune boost [in kernel], 
     # not Power Hal [in Userspace] which relies on Perfd.
     # AKA: No Power Hal hints!
-    stop perfd
+    # stop perfd <- 8.1 using powerhal for now
 
     # Boost sched_cfs_boost on boot
     write /proc/sys/kernel/sched_cfs_boost 70
@@ -27,14 +31,63 @@ on property:dev.bootcomplete=1
 #    setprop audio.offload.pcm.24bit.enable true
 #    setprop audio_hal.period_multiplier 2
 
+    # according to Qcom this legacy value improves first launch latencies
+    # stock value is 512k
+    setprop dalvik.vm.heapminfree 2m
+
+    # Zram
+    chown system system /sys/block/zram0/comp_algorithm
+    chown system system /sys/block/zram0/max_comp_streams
+    chown system system /sys/block/zram0/disksize
+    chmod 0664  /sys/block/zram0/comp_algorithm
+    chmod 0664  /sys/block/zram0/max_comp_streams
+    chmod 0664  /sys/block/zram0/disksize	
+
+    # KCal
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_cont
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_hue
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_invert
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_sat
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_val
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_invert
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
+    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
+
+    # cpufreq settings
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+
+    # gpu
+    chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+    chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+
+    # Set idle GPU to 133 Mhz
+    write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 6
+
     # USB Fast Charge
     write /sys/kernel/fast_charge/force_fast_charge 1
 
     # Set RCU stall timeout to minimal value
     write /sys/module/rcupdate/parameters/rcu_cpu_stall_timeout 3
 
-    # WiFi Mac Address Randomization
-    write /proc/sys/dev/cnss/randomize_mac 1
+    # WiFi Mac Address Randomization / Don't set let user set this.
+    # but keep for ref.	
+    # write /proc/sys/dev/cnss/randomize_mac 1
 
     # Entropy Pool /dev/random
     write /proc/sys/kernel/random/poolsize 4096
@@ -44,23 +97,23 @@ on property:dev.bootcomplete=1
     # IO Tweaks
     write /sys/block/sda/queue/rq_affinity 2
 
+    # Reset sched_cfs_boost (after boot)
+    write /proc/sys/kernel/sched_cfs_boost 0
+
     # Set Schedutil Cpu Governor on Big.Little Cores
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
-
-    # Reset sched_cfs_boost (we only want top-app boosted)
-    write /proc/sys/kernel/sched_cfs_boost 0
 
     # schedTune value for foreground/top-app on boot
     write /dev/stune/foreground/schedtune.prefer_idle 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
 
-    # Set Top-App Boost to ZERO	
-    write /dev/stune/top-app/schedtune.boost 0
+    # Set Top-App Boost to ZERO	(not needed using PowerHal not DTS)
+    # write /dev/stune/top-app/schedtune.boost 0
 
     # Cpu-boot / Dynamic Stune Boost
     write /sys/module/cpu_boost/parameters/dynamic_stune_boost 15
-    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 0
     write /sys/module/cpu_boost/parameters/input_boost_freq "0:0 1:0 2:0 3:0"
     write /sys/module/cpu_boost/parameters/input_boost_ms 1500
 
