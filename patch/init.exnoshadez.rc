@@ -2,17 +2,11 @@
 
 on init
 
-    write /sys/block/zram0/comp_algorithm lz4
-    write /sys/block/zram0/max_comp_streams 4
-    write /sys/block/zram0/disksize 536870912
-
-    # disable perfd = We use Dynamic Stune boost [in kernel], 
-    # not Power Hal [in Userspace] which relies on Perfd.
-    # AKA: No Power Hal hints!
-    # stop perfd <- 8.1 using powerhal for now
-
     # Boost sched_cfs_boost on boot
-    write /proc/sys/kernel/sched_cfs_boost 70
+    write /proc/sys/kernel/sched_cfs_boost 90
+
+    # set UI / Render Threads SCHED_FIFO
+    setprop sys.use_fifo_ui 1	
 
 on boot 
 
@@ -25,52 +19,9 @@ service devfreq_set /system/devfreq_set.sh
 
 on property:dev.bootcomplete=1
 
-#    setprop setprop audio_hal.period_size 384
-#    setprop audio.offload.buffer.size.kb 64
-#    setprop audio.offload.passthrough true	
-#    setprop audio.offload.pcm.24bit.enable true
-#    setprop audio_hal.period_multiplier 2
-
     # according to Qcom this legacy value improves first launch latencies
     # stock value is 512k
     setprop dalvik.vm.heapminfree 2m
-
-    # Zram
-    chown system system /sys/block/zram0/comp_algorithm
-    chown system system /sys/block/zram0/max_comp_streams
-    chown system system /sys/block/zram0/disksize
-    chmod 0664  /sys/block/zram0/comp_algorithm
-    chmod 0664  /sys/block/zram0/max_comp_streams
-    chmod 0664  /sys/block/zram0/disksize	
-
-    # KCal
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_cont
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_hue
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_invert
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_sat
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_val
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_invert
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
-    chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
-
-    # cpufreq settings
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
-
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 
     # gpu
     chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
@@ -97,12 +48,11 @@ on property:dev.bootcomplete=1
     # IO Tweaks
     write /sys/block/sda/queue/rq_affinity 2
 
-    # Reset sched_cfs_boost (after boot)
-    write /proc/sys/kernel/sched_cfs_boost 0
-
     # Set Schedutil Cpu Governor on Big.Little Cores
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
+    # echo 500 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us
+    # echo 2000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us
 
     # schedTune value for foreground/top-app on boot
     write /dev/stune/foreground/schedtune.prefer_idle 1
@@ -112,9 +62,13 @@ on property:dev.bootcomplete=1
     # write /dev/stune/top-app/schedtune.boost 0
 
     # Cpu-boot / Dynamic Stune Boost
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 15
-    write /sys/module/cpu_boost/parameters/input_boost_enabled 0
-    write /sys/module/cpu_boost/parameters/input_boost_freq "0:0 1:0 2:0 3:0"
-    write /sys/module/cpu_boost/parameters/input_boost_ms 1500
+    # write /sys/module/cpu_boost/parameters/dynamic_stune_boost 15
+    # Cpu-boost Input boosting 
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:1363200 1:0 2:1900800 3:0"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 100
+
+    # Reset sched_cfs_boost (after boot / at end)
+    write /proc/sys/kernel/sched_cfs_boost 0
 
     # GoodBye!
